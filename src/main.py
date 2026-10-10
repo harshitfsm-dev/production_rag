@@ -1,9 +1,13 @@
-import logging
 import os
+import logging
+import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-import uvicorn
+
+from src.services.ollama.factory import make_ollama_client
+from src.config import get_settings
+from src.db.factory import make_database
 from src.routers import health
 
 
@@ -20,6 +24,17 @@ async def lifespan(app: FastAPI):
     Lifespan for the API.
     """
     logger.info("Starting RAG API...")
+
+    settings = get_settings()
+    app.state.settings = settings
+
+    database = make_database()
+    app.state.database = database
+    logger.info("Database connected")
+
+    # app.state.embeddings_service = make_embeddings_service()
+    app.state.ollama_client = make_ollama_client()
+    # logger.info("Services initialized: PDF parser, OpenSearch, Embeddings, Ollama, Cache")
     yield
 
 app = FastAPI(

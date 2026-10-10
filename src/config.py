@@ -4,7 +4,6 @@ from typing import Literal
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 PROJECT_ROOT = Path(__file__).parent.parent
 ENV_FILE_PATH = PROJECT_ROOT / ".env"
 
@@ -49,7 +48,6 @@ class ChunkingSettings(BaseConfigSettings):
     section_based: bool = True  # Use section-based chunking when available
 
 
-
 class OpenSearchSettings(BaseConfigSettings):
     model_config = SettingsConfigDict(
         env_file=[".env", str(ENV_FILE_PATH)],
@@ -61,7 +59,9 @@ class OpenSearchSettings(BaseConfigSettings):
 
     host: str = "http://localhost:9200"
     index_name: str = "rag-papers"
-    chunk_index_suffix: str = "chunks"  # Creates single hybrid index: {index_name}-{suffix}
+    chunk_index_suffix: str = (
+        "chunks"  # Creates single hybrid index: {index_name}-{suffix}
+    )
     max_text_size: int = 1000000
 
     # Vector search settings
@@ -100,16 +100,17 @@ class Settings(BaseConfigSettings):
     environment: Literal["development", "staging", "production"] = "development"
     service_name: str = "rag-api"
 
-    postgres_database_url: str = "postgresql://rag_user:rag_password@localhost:5432/rag_db"
+    postgres_database_url: str = (
+        "postgresql://rag_user:rag_password@localhost:5432/rag_db"
+    )
     postgres_echo_sql: bool = False
     postgres_pool_size: int = 20
     postgres_max_overflow: int = 0
 
+    ollama_host: str = "http://localhost:11434"
     ollama_model: str = "gemma4:12b-mlx"
     ollama_embedding_model: str = "qwen3-embedding:4b"
     ollama_timeout: int = 500
-
-    
 
     pdf_parser: PDFParserSettings = Field(default_factory=PDFParserSettings)
 
@@ -120,8 +121,12 @@ class Settings(BaseConfigSettings):
     @field_validator("postgres_database_url")
     @classmethod
     def validate_database_url(cls, v: str) -> str:
-        if not (v.startswith("postgresql://") or v.startswith("postgresql+psycopg2://")):
-            raise ValueError("Database URL must start with 'postgresql://' or 'postgresql+psycopg2://'")
+        if not (
+            v.startswith("postgresql://") or v.startswith("postgresql+psycopg2://")
+        ):
+            raise ValueError(
+                "Database URL must start with 'postgresql://' or 'postgresql+psycopg2://'"
+            )
         return v
 
 
