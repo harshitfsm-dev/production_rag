@@ -1,6 +1,7 @@
-import datetime
+
+import json
 import logging
-from typing import Any, Dict, Optional
+from fastapi.responses import StreamingResponse
 from fastapi import APIRouter, HTTPException
 
 from src.schemas.ollama import OllamaChatRequest, OllamaResponse
@@ -20,6 +21,31 @@ async def ollama_chat(
         model_response = await ollama_client.generate(ollama_model, request.query)
         
         return OllamaResponse.model_validate(model_response)
+
+    except Exception as e:
+        logging.error(f"Error processing request: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.post("/ollama_chat_stream", tags=["Ollama"])
+async def ollama_chat(
+    request: OllamaChatRequest, settings: SettingsDep
+) -> StreamingResponse:
+    try:
+        ollama_client = OllamaClient(settings)
+        ollama_model = request.model or settings.ollama_model
+        async def generate():
+            async for chunk in ollama_client.generate_stream(
+                ollama_model,
+                request.query,
+            ):
+                yield json.dumps(chunk) + "\n"
+
+        return StreamingResponse(
+            generate(),
+            media_type="application/x-ndjson",
+            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"}
+        )
 
     except Exception as e:
         logging.error(f"Error processing request: {e}")
