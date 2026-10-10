@@ -1,6 +1,8 @@
 import json
 import logging
+import random
 from typing import Any, Dict, List, Optional
+from tenacity import before_sleep_log, retry, stop_after_attempt
 
 import httpx
 from src.config import Settings
@@ -33,9 +35,7 @@ class OllamaClient:
 
                 
                 # Check version endpoint for health
-                print("base_url==>>", self.base_url)
                 response = await client.get(f"{self.base_url}/api/version")
-                print("response==>>", response)
                 if response.status_code == 200:
                     version_data = response.json()
                     return {
@@ -81,6 +81,7 @@ class OllamaClient:
         except Exception as e:
             raise OllamaException(f"Error listing models: {e}")
 
+    @retry(stop=stop_after_attempt(3), reraise=True, before_sleep=before_sleep_log(logger, logging.WARNING))
     async def generate(self, model: str, prompt: str, stream: bool = False, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Generate text using specified model.

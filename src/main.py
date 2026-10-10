@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from src.services.ollama.factory import make_ollama_client
 from src.config import get_settings
 from src.db.factory import make_database
-from src.routers import health
+from src.routers import health, ollama
 
 
 logging.basicConfig(
@@ -46,6 +46,7 @@ app = FastAPI(
 
 # Include routers
 app.include_router(health.router, prefix="/api/v1")  # Health check endpoint
+app.include_router(ollama.router, prefix="/api/v1")  # Health check endpoint
 # app.include_router(hybrid_search.router, prefix="/api/v1")  # Search chunks with BM25/hybrid
 
 

@@ -110,7 +110,7 @@ class Settings(BaseConfigSettings):
     ollama_host: str = "http://localhost:11434"
     ollama_model: str = "gemma4:12b-mlx"
     ollama_embedding_model: str = "qwen3-embedding:4b"
-    ollama_timeout: int = 500
+    ollama_timeout: int = 300
 
     pdf_parser: PDFParserSettings = Field(default_factory=PDFParserSettings)
 

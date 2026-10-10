@@ -23,4 +23,5 @@ dependencies = [
     "redis>=8.1.0",
     "langchain-core>=1.6.7",
     "psycopg2-binary==2.9.13",
+    "tenacity>=9.2.1",
 ]
